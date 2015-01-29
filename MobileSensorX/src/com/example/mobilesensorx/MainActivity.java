@@ -40,7 +40,10 @@ public class MainActivity extends Activity {
 	Button btEnd;
 	Button btGetAllSensors;
 	Button btClose;
-
+	
+	EditText etFrequency;
+	int sampleFre;
+	
 	TextView txReadingData;
 	TextView txStoragePath;
 	LinearLayout lySensorList;
@@ -93,6 +96,9 @@ public class MainActivity extends Activity {
     	txStoragePath = (TextView) findViewById(R.id.tx_storage_path);
     	//txStoragePath.setMovementMethod(ScrollingMovementMethod.getInstance());
     	
+    	etFrequency = (EditText) findViewById(R.id.et_frequency);
+    	etFrequency.setText(1000);
+    	
     	agSensorManager = (SensorManager)getSystemService(SENSOR_SERVICE);
     	
     	lySensorList = (LinearLayout) findViewById(R.id.ly_sensor_list);
@@ -124,6 +130,8 @@ public class MainActivity extends Activity {
 				// TODO Auto-generated method stub
 				txReadingData.setText("");
 		    	txStoragePath.setText("");
+		    	
+		    	sampleFre = Integer.parseInt(etFrequency.getText().toString());
 		    	
 				if(!Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)){
 					Toast.makeText(MainActivity.this, "No SDCard or SDCard can't be writen!", Toast.LENGTH_SHORT).show();
@@ -224,7 +232,8 @@ public class MainActivity extends Activity {
 				// 注册对应的传感器监听
 				agSensorManager.registerListener(agSensorListener,
 						agSensorManager.getDefaultSensor(se.getType()),
-						SensorManager.SENSOR_DELAY_NORMAL);
+						sampleFre);
+						//SensorManager.SENSOR_DELAY_NORMAL);
 				
 				// 穿件对应的数据存储文件
 				try {

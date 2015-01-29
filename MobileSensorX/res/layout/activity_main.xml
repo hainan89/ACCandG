@@ -3,7 +3,11 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical">
-
+	
+    <EditText android:id="@+id/et_frequency"
+		        android:layout_width="match_parent"
+		        android:layout_height="20dip"/>
+    
     <LinearLayout android:layout_width="match_parent"
 	    android:layout_height="50dip"
 	    android:orientation="horizontal">
