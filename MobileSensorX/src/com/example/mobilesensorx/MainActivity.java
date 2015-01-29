@@ -21,11 +21,15 @@ import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemSelectedListener;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.hardware.Sensor;
@@ -44,6 +48,10 @@ public class MainActivity extends Activity {
 	EditText etFrequency;
 	int sampleFre;
 	
+	Spinner spFre;
+	private ArrayAdapter<String> adapterSp;
+	int freUnitTimes = 1;
+	
 	TextView txReadingData;
 	TextView txStoragePath;
 	LinearLayout lySensorList;
@@ -52,6 +60,8 @@ public class MainActivity extends Activity {
 	
 	List<Sensor> allSensorList;
 	List<CheckBox> sensorBoxList;
+	
+	private static final String[] freUnit={"uS","mS","S"};
 	
 	int totalMessageNum = 0;
 	
@@ -97,7 +107,25 @@ public class MainActivity extends Activity {
     	//txStoragePath.setMovementMethod(ScrollingMovementMethod.getInstance());
     	
     	etFrequency = (EditText) findViewById(R.id.et_frequency);
-    	etFrequency.setText(1000);
+    	etFrequency.setText("1000");
+    	
+    	spFre = (Spinner) findViewById(R.id.sp_unit);
+    	adapterSp = new ArrayAdapter<String>(this,android.R.layout.simple_spinner_item,freUnit);
+    	adapterSp.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+    	spFre.setAdapter(adapterSp);
+    	spFre.setOnItemSelectedListener(new OnItemSelectedListener(){
+    		public void onItemSelected(AdapterView<?> arg0, View arg1, int arg2,  
+                    long arg3) {  
+    			freUnitTimes = (int)Math.pow(1000, arg2);
+    			//txReadingData.append(String.format("%d", freUnitTimes));
+            }
+
+			@Override
+			public void onNothingSelected(AdapterView<?> arg0) {
+				// TODO Auto-generated method stub
+				
+			}
+    	});
     	
     	agSensorManager = (SensorManager)getSystemService(SENSOR_SERVICE);
     	
@@ -130,8 +158,6 @@ public class MainActivity extends Activity {
 				// TODO Auto-generated method stub
 				txReadingData.setText("");
 		    	txStoragePath.setText("");
-		    	
-		    	sampleFre = Integer.parseInt(etFrequency.getText().toString());
 		    	
 				if(!Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)){
 					Toast.makeText(MainActivity.this, "No SDCard or SDCard can't be writen!", Toast.LENGTH_SHORT).show();
@@ -209,6 +235,11 @@ public class MainActivity extends Activity {
       
     public void registeSensors(){
     	
+    	sampleFre = Integer.parseInt(etFrequency.getText().toString());
+    	sampleFre = sampleFre * freUnitTimes; // us数
+    	
+    	//Toast.makeText(MainActivity.this, String.format("--%d--", sampleFre), Toast.LENGTH_SHORT).show();
+    	
     	Time t=new Time(); // or Time t=new Time("GMT+8"); 加上Time Zone资料。  
 		t.setToNow(); // 取得系统时间。  
 		int t_year = t.year;  
@@ -230,11 +261,12 @@ public class MainActivity extends Activity {
 				fileName = String.format("%d%d%d%d%d%d-%s.txt", t_year,t_month,t_date,t_hour,t_minute,t_second, sensor_type_strs[se.getType()]);
 				
 				// 注册对应的传感器监听
+				//sampleFre = sampleFre * freUnitTimes;
 				agSensorManager.registerListener(agSensorListener,
 						agSensorManager.getDefaultSensor(se.getType()),
 						sampleFre);
 						//SensorManager.SENSOR_DELAY_NORMAL);
-				
+				//txReadingData.append(String.format("--%d--", sampleFre));
 				// 穿件对应的数据存储文件
 				try {
 					File recordFile = new File(android.os.Environment.getExternalStorageDirectory() + "/" + fileName);
